@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const scrapeProducts = require('./scraper');
+const scrapeDocuments = require('./routes/scraper');
 
 
 const app = express();
@@ -10,7 +10,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
 // middleware for routes
-app.use('/', scrapeProducts);
+app.use('/', scrapeDocuments);
 
 // Server listening
 const server = app.listen(port, () => {
