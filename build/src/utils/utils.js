@@ -2,12 +2,12 @@ import axios from "axios";
 const url = process.env.BASE_URL_DEV;
 export const getData = async (next) => {
     try {
-        const response = await axios.get(url);
-        return response.data;
+        return await axios.get(url);
     }
     catch (error) {
         console.error(error);
         next(error);
+        return null;
     }
 };
 export const getDataWithRetry = async (url, next, retry = 3, delay = 1000) => {
@@ -24,5 +24,6 @@ export const getDataWithRetry = async (url, next, retry = 3, delay = 1000) => {
             return getDataWithRetry(url, next, retry - 1, delayToUse * 2);
         }
         next(error);
+        return null;
     }
 };
