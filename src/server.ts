@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import scrapeDocuments from './routes/scraper.js';
 import { errorHandler } from './middleware/middleware.js';
 import 'dotenv/config';
@@ -8,7 +8,12 @@ const port: string | number = process.env.PORT || 3000;
 
 
 // middleware for routes
-app.use('/', scrapeDocuments);
+app.use('/api', scrapeDocuments);
+app.use('/api/test', (req:Request, res:Response) => {
+  console.log(req);
+  res.send('Test endpoint');
+});
+
 app.use(errorHandler);
 
 // Server listening
