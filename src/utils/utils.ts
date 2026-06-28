@@ -72,27 +72,29 @@ export const parseXml = async ({ xml, jsessionid, next, index }: TypeParserXmlAr
   const id:string = index === 0 ? 'listarDetalleInfraccionRAAForm:pgLista' : 'listarDetalleInfraccionRAAForm:dt';
   const $xml = cheerio.load(xml, { xmlMode: true });
   const tablaHtml = $xml(`update[id="${id}"]`).text();
-  const $ = cheerio.load(tablaHtml);
+  const $ = cheerio.load(index === 0 ? tablaHtml : `<table>${tablaHtml}</table>`);
 
   const viewStateRaw = $xml('update[id="j_id1:javax.faces.ViewState:0"]').text();
   const nuevoViewState = cheerio.load(viewStateRaw).text();
 
   const filas: Array<{ paramUuid: string; btnId: string; nro: string }> = [];
-  $('tr[data-ri]').each((index, row) => {
+  console.log('Trs encontrados:', $('tr[data-ri]').length);
+  $('tr[data-ri]').each((_index, row) => {
     const celdas = $(row).find('td');
     const onclick = $(celdas[6]).find('a').attr('onclick') || '';
     const match = onclick.match(/param_uuid['"]\s*:\s*['"]([^'"]+)/);
     const paramUuid = match ? match[1] : null;
+    console.log('Param UUID:', paramUuid);
     if (paramUuid) {
       filas.push({
         paramUuid,
-        btnId: `listarDetalleInfraccionRAAForm:dt:${index}:j_idt63`,
+        btnId: `listarDetalleInfraccionRAAForm:dt:${_index}:j_idt63`,
         nro: $(celdas[1]).text().trim().split('/').join('-')
       });
     }
   });
   console.log('Filas encontradas:', filas.length);
-  for (const fila of filas) {
+  /*for (const fila of filas) {
     await downloadPdf({
       jsessionid,
       viewState: nuevoViewState,
@@ -101,7 +103,7 @@ export const parseXml = async ({ xml, jsessionid, next, index }: TypeParserXmlAr
       outputPath: `./pdfs/${fila.nro}.pdf`,
       next
     });
-  }
+  }*/
 
   return {
     nuevoViewState

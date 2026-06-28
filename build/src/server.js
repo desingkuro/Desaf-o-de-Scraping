@@ -5,7 +5,11 @@ import 'dotenv/config';
 const app = express();
 const port = process.env.PORT || 3000;
 // middleware for routes
-app.use('/', scrapeDocuments);
+app.use('/api', scrapeDocuments);
+app.use('/api/test', (req, res) => {
+    console.log(req);
+    res.send('Test endpoint');
+});
 app.use(errorHandler);
 // Server listening
 const server = app.listen(port, () => {
