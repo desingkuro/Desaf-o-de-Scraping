@@ -94,7 +94,7 @@ export const parseXml = async ({ xml, jsessionid, next, index }: TypeParserXmlAr
     }
   });
   console.log('Filas encontradas:', filas.length);
-  /*for (const fila of filas) {
+  for (const fila of filas) {
     await downloadPdf({
       jsessionid,
       viewState: nuevoViewState,
@@ -103,7 +103,7 @@ export const parseXml = async ({ xml, jsessionid, next, index }: TypeParserXmlAr
       outputPath: `./pdfs/${fila.nro}.pdf`,
       next
     });
-  }*/
+  }
 
   return {
     nuevoViewState
