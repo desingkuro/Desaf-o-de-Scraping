@@ -3,7 +3,7 @@ import { extractViewState, extractJsessionId, parseXmlToPageResult, extractFormA
 import type { ScraperResult, Fila } from '../types/scraper.types.js';
 import { config } from '../config/index.js';
 
-export async function run(busqueda = '', maxPages = config.maxPages): Promise<ScraperResult> {
+export async function run(busqueda = ''): Promise<ScraperResult> {
   console.log('[1/5] Obteniendo pagina de inicio...');
   const response = await getPage();
   const formAction = extractFormAction(response.data);
@@ -43,7 +43,7 @@ export async function run(busqueda = '', maxPages = config.maxPages): Promise<Sc
   console.log('  totalPages:', firstPage.totalPages);
   console.log('  filas count:', firstPage.filas.length);
 
-  const totalPages = Math.min(firstPage.totalPages, maxPages);
+  const totalPages = firstPage.totalPages;
   let currentViewState = firstPage.nuevoViewState;
   let filas: Fila[] = firstPage.filas;
   let totalPdfs = 0;
