@@ -1,10 +1,12 @@
+import fs from 'fs';
+import path from 'path';
 import { getPage, postForm, downloadPdf, postPaginationAjax } from './http.service.js';
 import { extractViewState, extractJsessionId, parseXmlToPageResult, extractFormAction, getSearchButtonParams, extractFormFields, buildPaginationParams, extractViewStateFromXml, extractPanelHtml, parsePanelToFilas } from './parser.service.js';
 import type { ScraperResult, Fila } from '../types/scraper.types.js';
 import { config } from '../config/index.js';
 
 export async function run(busqueda = ''): Promise<ScraperResult> {
-  console.log('[1/5] Obteniendo pagina de inicio...');
+  console.log('Obteniendo pagina de inicio...');
   const response = await getPage();
   const formAction = extractFormAction(response.data);
   const viewState = extractViewState(response.data);
@@ -44,6 +46,9 @@ export async function run(busqueda = ''): Promise<ScraperResult> {
   let filas: Fila[] = firstPage.filas;
   let totalPdfs = 0;
 
+  const datosDir = path.resolve('datos');
+  fs.mkdirSync(datosDir, { recursive: true });
+
   for (let page = 1; page <= totalPages; page++) {
     console.log(`\n=== Página ${page} de ${totalPages} ===`);
 
@@ -62,6 +67,11 @@ export async function run(busqueda = ''): Promise<ScraperResult> {
       }
       filas = parsePanelToFilas(panelHtml);
     }
+
+    fs.writeFileSync(
+      path.join(datosDir, `page-${page}.json`),
+      JSON.stringify(filas, null, 2),
+    );
 
     for (const fila of filas) {
       if (!fila.pdfUrl) {
