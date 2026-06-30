@@ -121,13 +121,28 @@ export async function postForm(
   formAction: string,
 ): Promise<string> {
   const fullUrl = formAction.startsWith('http') ? formAction : `https://jurisprudencia.pj.gob.pe${formAction}`;
-  const response = await axios.post(fullUrl, params, {
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      ...(jsessionid ? { 'Cookie': `JSESSIONID=${jsessionid}` } : {}),
-    },
-  });
-  return response.data;
+  const cookieHeader = jsessionid ? { 'Cookie': `JSESSIONID=${jsessionid}` } : {};
+
+  try {
+    const response = await axios.post(fullUrl, params, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        ...cookieHeader,
+      },
+      maxRedirects: 0,
+    });
+    return response.data;
+  } catch (err: any) {
+    const location = err.response?.headers?.['location'];
+    if (location) {
+      const httpsLocation = location.replace('http://', 'https://');
+      const result = await axios.get(httpsLocation, {
+        headers: cookieHeader,
+      });
+      return result.data;
+    }
+    throw err;
+  }
 }
 
 export function getParams(type: 'postBtn' | 'pagination', pageIndex: number, viewState: string): URLSearchParams {

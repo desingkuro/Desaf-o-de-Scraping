@@ -6,7 +6,7 @@ import { config } from '../config/index.js';
 export async function run(busqueda = '', maxPages = config.maxPages): Promise<ScraperResult> {
   const response = await getPage();
   const formAction = extractFormAction(response.data);
-  let viewState = extractViewState(response.data);
+  const viewState = extractViewState(response.data);
   const buttonParams = getSearchButtonParams(response.data);
   const formFields = extractFormFields(response.data);
 
@@ -29,16 +29,16 @@ export async function run(busqueda = '', maxPages = config.maxPages): Promise<Sc
   );
 
   const firstPage = parseXmlToPageResult(resultHtml);
-  let totalPages = Math.min(firstPage.totalPages, maxPages);
+  const totalPages = Math.min(firstPage.totalPages, maxPages);
   let currentViewState = firstPage.nuevoViewState;
   let filas: Fila[] = firstPage.filas;
-  let currentFormFields = extractFormFields(resultHtml);
   let totalPdfs = 0;
 
   for (let page = 1; page <= totalPages; page++) {
     console.log(`\n=== Página ${page} de ${totalPages} ===`);
 
     if (page > 1) {
+      const currentFormFields = extractFormFields(resultHtml);
       const pagParams = buildPaginationParams(page, currentViewState, currentFormFields);
       const pagXml = await postPaginationAjax(pagParams.toString(), jsessionid);
 

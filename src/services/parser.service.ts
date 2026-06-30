@@ -59,7 +59,10 @@ export function extractPdfUrlFromRow($xml: cheerio.CheerioAPI, index: number): s
 
 export function extractFormAction(html: string): string | undefined {
   const $ = cheerio.load(html);
-  return $('#formBuscador').attr('action');
+  const action = $('#formBuscador').attr('action');
+  if (!action) return undefined;
+  // Strip JSF session URL rewriting (;jsessionid=...)
+  return action.split(';')[0];
 }
 
 export function extractFormFields(html: string): Record<string, string> {
