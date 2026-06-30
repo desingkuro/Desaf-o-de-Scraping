@@ -10,6 +10,7 @@ export async function run(busqueda = ''): Promise<ScraperResult> {
   const viewState = extractViewState(response.data);
   const buttonParams = getSearchButtonParams(response.data);
   const formFields = extractFormFields(response.data);
+
   console.log('  formAction:', formAction);
   console.log('  viewState:', viewState?.slice(0, 30));
   console.log('  buttonParams:', JSON.stringify(buttonParams));
@@ -28,17 +29,12 @@ export async function run(busqueda = ''): Promise<ScraperResult> {
   const jsessionid = extractJsessionId(response);
   console.log('  jsessionid:', jsessionid?.slice(0, 20));
 
-  console.log('[2/5] Enviando POST de busqueda...');
   const resultHtml = await postForm(
     new URLSearchParams(allParams).toString(),
     jsessionid,
     formAction,
   );
-  console.log('  response length:', resultHtml.length);
-  console.log('  contiene optResultado:', resultHtml.includes('id="formBuscador:optResultado"'));
-  console.log('  contiene panel:', resultHtml.includes('id="formBuscador:panel"'));
 
-  console.log('[3/5] Parseando resultados...');
   const firstPage = parseXmlToPageResult(resultHtml);
   console.log('  totalPages:', firstPage.totalPages);
   console.log('  filas count:', firstPage.filas.length);

@@ -61,7 +61,6 @@ export function extractFormAction(html: string): string | undefined {
   const $ = cheerio.load(html);
   const action = $('#formBuscador').attr('action');
   if (!action) return undefined;
-  // Strip JSF session URL rewriting (;jsessionid=...)
   return action.split(';')[0];
 }
 
