@@ -25,8 +25,8 @@ pnpm run dev
 ## Uso
 
 ```bash
-# buscar "amparo" y descargar TODOS los resultados
-curl "http://localhost:3000/api/documents?q=amparo"
+
+curl "http://localhost:3000/api/documents"
 ```
 
 Los PDFs se guardan en `pdfs/`. Para frenar el proceso solo mata el proceso (Ctrl+C).
