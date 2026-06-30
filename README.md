@@ -4,21 +4,16 @@ Scraper para extraer resoluciones judiciales de [jurisprudencia.pj.gob.pe](https
 
 ## Requisitos
 
-- Docker (si no quieres instalar nada local)
-- O Node.js 22 + pnpm si prefieres correrlo directo
+- Docker
+- O Node.js 22 + pnpm
 
-## Con Docker (recomendado para Windows)
+## Con Docker
 
 ```bash
-# clonar y entrar
 git clone <repo> && cd scraper-challenge
-
-# crear .env (preguntame si no lo tienes)
-# y luego:
+# crear .env (ver abajo)
 docker compose up --build
 ```
-
-Va a quedar escuchando en `http://localhost:3000`.
 
 ## Sin Docker
 
@@ -30,26 +25,25 @@ pnpm run dev
 ## Uso
 
 ```bash
-# buscar "amparo" y descargar las primeras 3 paginas de resultados
-curl "http://localhost:3000/api/documents?q=amparo&pages=3"
+# buscar "amparo" y descargar TODOS los resultados
+curl "http://localhost:3000/api/documents?q=amparo"
 ```
 
-Los PDFs se guardan en la carpeta `pdfs/`.
+Los PDFs se guardan en `pdfs/`. Para frenar el proceso solo mata el proceso (Ctrl+C).
 
-## Variables de entorno (.env)
+## .env
 
-| Variable | Descripcion |
-|----------|-------------|
-| `PORT` | Puerto del servidor (default 3000) |
-| `BASE_URL_INICIO` | URL de la pagina de busqueda |
-| `BASE_URL` | URL donde se hacen los AJAX de resultados |
-| `MAX_PAGES` | Numero maximo de paginas a procesar (default 5) |
+```
+PORT=3000
+BASE_URL_INICIO=https://jurisprudencia.pj.gob.pe/jurisprudenciaweb/faces/page/inicio.xhtml
+BASE_URL=https://jurisprudencia.pj.gob.pe/jurisprudenciaweb/faces/page/resultado.xhtml
+```
 
 ## Como funciona
 
-1. Hace GET a la pagina de inicio y extrae los campos del formulario
+1. Hace GET a inicio.xhtml y extrae los campos del formulario
 2. Hace POST con los filtros de busqueda
-3. Por cada pagina de resultados, extrae los UUIDs y descarga los PDFs
-4. Repite hasta terminar las paginas configuradas
+3. Por cada pagina de resultados (paginacion via JSF/RichFaces), extrae los UUIDs y descarga los PDFs
+4. Repite hasta que se acaban las paginas
 
-El sistema de paginacion usa JSF/RichFaces, asi que las peticiones internas son POST con `faces-request: partial/ajax` y todo eso. No hay nada bonito, solo funcional.
+Si el servidor se pone pesado (429), espera y reintenta solo.
