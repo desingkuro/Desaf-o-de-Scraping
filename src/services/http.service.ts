@@ -1,9 +1,12 @@
+import fs from 'fs';
+import path from 'path';
 import * as cheerio from 'cheerio';
 import axios, { type AxiosResponse } from 'axios';
 import { config } from '../config/index.js';
 
 
 const url = config.baseUrl;
+const resultUrl = config.resultUrl;
 
 export async function getPage(): Promise<AxiosResponse> {
   console.log('Getting data from:', url);
@@ -62,12 +65,62 @@ export async function postWithRetry(
   }
 }
 
+export async function downloadPdf(
+  url: string,
+  filepath: string,
+  jsessionid: string,
+): Promise<void> {
+  const dir = path.dirname(filepath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  const response = await axios.get(url, {
+    responseType: 'arraybuffer',
+    headers: {
+      'Cookie': `JSESSIONID=${jsessionid}`,
+    },
+  });
+  fs.writeFileSync(filepath, response.data);
+}
+
+export async function postPaginationAjax(
+  params: string,
+  jsessionid: string,
+): Promise<string> {
+  const response = await axios.post(resultUrl, params, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      'Cookie': `JSESSIONID=${jsessionid}`,
+      'Faces-Request': 'partial/ajax',
+      'X-Requested-With': 'XMLHttpRequest',
+    },
+  });
+  return response.data;
+}
+
+export async function postDetailAjax(
+  params: string,
+  jsessionid: string,
+): Promise<string> {
+  const response = await axios.post(resultUrl, params, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      'Cookie': `JSESSIONID=${jsessionid}`,
+      'Faces-Request': 'partial/ajax',
+      'X-Requested-With': 'XMLHttpRequest',
+      'Origin': 'https://jurisprudencia.pj.gob.pe',
+      'Referer': 'https://jurisprudencia.pj.gob.pe/jurisprudenciaweb/faces/page/resultado.xhtml',
+    },
+  });
+  return response.data;
+}
+
 export async function postForm(
   params: string,
   jsessionid: string | undefined,
   formAction: string,
 ): Promise<string> {
-  const fullUrl = new URL(formAction, config.baseUrl).href;
+  const fullUrl = formAction.startsWith('http') ? formAction : `https://jurisprudencia.pj.gob.pe${formAction}`;
   const response = await axios.post(fullUrl, params, {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -120,9 +173,11 @@ export function getParams(type: 'postBtn' | 'pagination', pageIndex: number, vie
 }
 
 export function getTotalPages(xml: string) {
-  const $xml = cheerio.load(xml, { xmlMode: true });
+  const $xml = cheerio.load(xml);
   const totalText = $xml(`span[id="formBuscador:optResultado"]`).text();
-  const totalRecords = parseInt(totalText.match(/\d+/g)?.[8] || '0', 10);
+  console.log('Total text:', totalText);
+  const numbers = totalText.match(/\d+/g);
+  const totalRecords = parseInt(numbers?.[numbers.length - 1] || '0', 10);
   const totalPages = Math.ceil(totalRecords / 10);
   return totalPages;
 }
