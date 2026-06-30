@@ -1,0 +1,11 @@
+services:
+  scraper:
+    build: .
+    container_name: scraper-challenge
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./src:/app/src
+      - ./pdfs:/app/pdfs
