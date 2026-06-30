@@ -3,5 +3,6 @@ node_modules
 .gitignore
 build
 pdfs
+datos
 conexion_peru.ovpn
 *.md
