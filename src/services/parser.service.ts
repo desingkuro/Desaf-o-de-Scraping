@@ -217,14 +217,10 @@ export function extractButtonParams(onclick: string): Record<string, string> | n
   if (!match) return null;
 
   const params: Record<string, string> = {};
-  const pairs = match[1].match(/\\'[^\\']+\\'\s*:\s*\\'[^\\']*\\'/g);
-  if (pairs) {
-    for (const pair of pairs) {
-      const sep = pair.indexOf(':');
-      const key = pair.slice(2, sep - 2).trim();
-      const val = pair.slice(sep + 2, -2).trim();
-      params[key] = val;
-    }
+  const pairRegex = /\\'([^\\']+)\\'\s*:\s*\\'([^\\']*)\\'/g;
+  let pairMatch;
+  while ((pairMatch = pairRegex.exec(match[1])) !== null) {
+    params[pairMatch[1].trim()] = pairMatch[2].trim();
   }
   return params;
 }

@@ -120,7 +120,9 @@ export async function postForm(
   jsessionid: string | undefined,
   formAction: string,
 ): Promise<string> {
-  const fullUrl = formAction.startsWith('http') ? formAction : `https://jurisprudencia.pj.gob.pe${formAction}`;
+  const cleanAction = formAction.split(';')[0];
+  const sessionSuffix = jsessionid ? `;jsessionid=${jsessionid}` : '';
+  const fullUrl = `https://jurisprudencia.pj.gob.pe${cleanAction}${sessionSuffix}`;
   const cookieHeader = jsessionid ? { 'Cookie': `JSESSIONID=${jsessionid}` } : {};
 
   try {
